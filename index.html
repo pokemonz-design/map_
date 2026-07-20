@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Где профессиональная ловушка опаснее всего</title>
+
+  <style>
+    :root {
+      --orange: #ff7a16;
+      --orange-dark: #e85f00;
+      --orange-light: #fff0e4;
+      --orange-medium: #ffb273;
+
+      --black: #080808;
+      --gray-dark: #4f4f4f;
+      --gray: #777777;
+      --gray-light: #ece8e3;
+
+      --white: #ffffff;
+      --background: #f6f4f1;
+
+      --risk-high: #ff7a16;
+      --risk-medium: #ffc28d;
+      --risk-low: #f2eee9;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--black);
+      background: var(--background);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .heatmap {
+      width: min(1220px, calc(100% - 32px));
+      margin: 32px auto;
+      overflow: hidden;
+      background: var(--white);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Верхняя рубрика */
+    .heatmap__rubric {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 70px;
+      padding: 16px 28px;
+      color: var(--black);
+      background: var(--orange);
+      font-size: 18px;
+    }
+
+    .heatmap__rubric strong {
+      color: var(--white);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 24px;
+    }
+
+    .heatmap__header {
+      padding: 42px 46px 28px;
+    }
+
+    .heatmap__eyebrow {
+      margin: 0 0 14px;
+      color: var(--orange-dark);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .heatmap__title {
+      max-width: 960px;
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(38px, 5.8vw, 68px);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .heatmap__lead {
+      max-width: 850px;
+      margin: 26px 0 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(19px, 2.2vw, 25px);
+      line-height: 1.42;
+    }
+
+    .heatmap__lead strong {
+      color: var(--orange-dark);
+    }
+
+    .heatmap__body {
+      padding: 0 46px 48px;
+    }
+
+    .heatmap__legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 22px;
+      align-items: center;
+      margin-bottom: 18px;
+      color: var(--gray-dark);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .legend-item__color {
+      width: 18px;
+      height: 18px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .legend-item__color--high {
+      background: var(--risk-high);
+    }
+
+    .legend-item__color--medium {
+      background: var(--risk-medium);
+    }
+
+    .legend-item__color--low {
+      background: var(--risk-low);
+    }
+
+    .heatmap__scroll {
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .heatmap-table {
+      width: 100%;
+      min-width: 940px;
+      border-collapse: separate;
+      border-spacing: 4px;
+      table-layout: fixed;
+    }
+
+    .heatmap-table th,
+    .heatmap-table td {
+      vertical-align: middle;
+    }
+
+    .heatmap-table thead th {
+      height: 94px;
+      padding: 12px 10px;
+      color: var(--black);
+      background: var(--white);
+      font-size: 14px;
+      line-height: 1.25;
+      text-align: center;
+      border-bottom: 3px solid var(--black);
+    }
+
+    .heatmap-table thead th:first-child {
+      width: 220px;
+      text-align: left;
+    }
+
+    .heatmap-table tbody th {
+      padding: 18px 16px;
+      color: var(--white);
+      background: var(--black);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      line-height: 1.2;
+      text-align: left;
+    }
+
+    .heatmap-cell {
+      padding: 0;
+      background: transparent;
+    }
+
+    .risk-button {
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-start;
+      width: 100%;
+      min-height: 112px;
+      padding: 14px;
+      color: var(--black);
+      text-align: left;
+      border: 0;
+      cursor: pointer;
+      transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        filter 0.18s ease;
+    }
+
+    .risk-button:hover,
+    .risk-button:focus-visible {
+      z-index: 2;
+      outline: none;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.15);
+      filter: saturate(1.08);
+    }
+
+    .risk-button.is-active {
+      z-index: 3;
+      outline: 4px solid var(--black);
+      outline-offset: -4px;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+    }
+
+    .risk-button--high {
+      color: var(--white);
+      background: var(--risk-high);
+    }
+
+    .risk-button--medium {
+      color: var(--black);
+      background: var(--risk-medium);
+    }
+
+    .risk-button--low {
+      color: var(--black);
+      background: var(--risk-low);
+    }
+
+    .risk-button__level {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .risk-button__level::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      flex: 0 0 auto;
+      background: currentColor;
+      border-radius: 50%;
+      opacity: 0.85;
+    }
+
+    /* Панель пояснения */
+    .explanation {
+      position: relative;
+      min-height: 246px;
+      margin-top: 28px;
+      overflow: hidden;
+      color: var(--white);
+      background: var(--black);
+    }
+
+    .explanation::after {
+      content: "";
+      position: absolute;
+      top: -120px;
+      right: -105px;
+      width: 320px;
+      height: 320px;
+      border: 62px solid var(--orange);
+      border-radius: 50%;
+    }
+
+    .explanation__content {
+      position: relative;
+      z-index: 1;
+      max-width: 880px;
+      padding: 34px 38px 36px;
+    }
+
+    .explanation__label {
+      margin: 0 0 10px;
+      color: var(--orange);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .explanation__title {
+      margin: 0 0 16px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(28px, 4vw, 45px);
+      line-height: 1.06;
+    }
+
+    .explanation__text {
+      max-width: 760px;
+      margin: 0;
+      font-size: 19px;
+      line-height: 1.55;
+    }
+
+    .explanation__conclusion {
+      display: inline-block;
+      margin-top: 22px;
+      padding: 12px 16px;
+      color: var(--black);
+      background: var(--orange);
+      font-weight: 800;
+    }
+
+    .heatmap__note {
+      margin: 20px 0 0;
+      color: var(--gray);
+      font-size: 13px;
+    }
+
+    @media (max-width: 760px) {
+      .heatmap {
+        width: 100%;
+        margin: 0;
+        box-shadow: none;
+      }
+
+      .heatmap__rubric {
+        padding: 14px 20px;
+        font-size: 15px;
+      }
+
+      .heatmap__rubric strong {
+        font-size: 19px;
+      }
+
+      .heatmap__header,
+      .heatmap__body {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      .heatmap__header {
+        padding-top: 30px;
+      }
+
+      .heatmap__body {
+        padding-bottom: 34px;
+      }
+
+      .explanation__content {
+        padding: 28px 22px 30px;
+      }
+
+      .explanation__text {
+        font-size: 17px;
+      }
+
+      .explanation::after {
+        top: -170px;
+        right: -180px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .risk-button {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="heatmap">
+
+    <div class="heatmap__rubric">
+      <strong>Люди и развитие</strong>
+      <span>Переход в роль CFO</span>
+    </div>
+
+    <header class="heatmap__header">
+      <p class="heatmap__eyebrow">
+        Интерактивная карта профессиональных рисков
+      </p>
+
+      <h1 class="heatmap__title">
+        Где ловушка опаснее всего
+      </h1>
+
+      <p class="heatmap__lead">
+        <strong>Нажмите на ячейку</strong>, чтобы увидеть, как привычная
+        логика главбуха влияет на бюджетирование, ликвидность, инвестиции,
+        управленческую отчетность и консолидацию.
+      </p>
+    </header>
+
+    <section class="heatmap__body">
+
+      <div class="heatmap__legend" aria-label="Уровни риска">
+        <span>Уровень риска:</span>
+
+        <span class="legend-item">
+          <span class="legend-item__color legend-item__color--high"></span>
+          высокий
+        </span>
+
+        <span class="legend-item">
+          <span class="legend-item__color legend-item__color--medium"></span>
+          средний
+        </span>
+
+        <span class="legend-item">
+          <span class="legend-item__color legend-item__color--low"></span>
+          низкий
+        </span>
+      </div>
+
+      <div class="heatmap__scroll">
+        <table class="heatmap-table">
+          <thead>
+            <tr>
+              <th scope="col">Профессиональная ловушка</th>
+              <th scope="col">Бюджетирование</th>
+              <th scope="col">Управление ликвидностью</th>
+              <th scope="col">Инвестиции</th>
+              <th scope="col">Управленческая отчетность</th>
+              <th scope="col">Консолидация</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <!-- Точность -->
+            <tr>
+              <th scope="row">Точность</th>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--high"
+                  type="button"
+                  data-trap="Точность"
+                  data-task="Бюджетирование"
+                  data-level="Высокий риск"
+                  data-text="Главбух ждет подтвержденных данных от подразделений. Бюджет собирают слишком поздно, а часть показателей переносят из прошлого периода без сценарного пересчета."
+                  data-conclusion="План выглядит точным, но быстро теряет актуальность."
+                >
+                  <span class="risk-button__level">Высокий</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--high is-active"
+                  type="button"
+                  data-trap="Точность"
+                  data-task="Управление ликвидностью"
+                  data-level="Высокий риск"
+                  data-text="Компания не закладывает просрочку дебиторской задолженности, потому что нет подтвержденных данных. Платежный календарь показывает ложный запас денег."
+                  data-conclusion="Кассовый разрыв обнаруживают, когда изменить график платежей уже сложно."
+                  aria-pressed="true"
+                >
+                  <span class="risk-button__level">Высокий</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--medium"
+                  type="button"
+                  data-trap="Точность"
+                  data-task="Инвестиции"
+                  data-level="Средний риск"
+                  data-text="Финансовая служба откладывает расчет проекта, пока не получит надежные данные по спросу, ценам и затратам. Бизнес теряет время и может упустить инвестиционную возможность."
+                  data-conclusion="CFO нужен не точный прогноз, а диапазон возможных результатов."
+                >
+                  <span class="risk-button__level">Средний</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--medium"
+                  type="button"
+                  data-trap="Точность"
+                  data-task="Управленческая отчетность"
+                  data-level="Средний риск"
+                  data-text="Отчет выпускают только после полного закрытия периода. Руководители получают достоверные показатели, но слишком поздно для оперативного решения."
+                  data-conclusion="Точность не компенсирует потерю управленческого времени."
+                >
+                  <span class="risk-button__level">Средний</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--low"
+                  type="button"
+                  data-trap="Точность"
+                  data-task="Консолидация"
+                  data-level="Низкий риск"
+                  data-text="Требование к точности помогает сверять внутригрупповые обороты и устранять расхождения. Риск возникает только тогда, когда сверка неоправданно задерживает выпуск отчетности."
+                  data-conclusion="Здесь точность чаще помогает, чем ограничивает."
+                >
+                  <span class="risk-button__level">Низкий</span>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Типовая методика -->
+            <tr>
+              <th scope="row">Типовая методика</th>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--medium"
+                  type="button"
+                  data-trap="Типовая методика"
+                  data-task="Бюджетирование"
+                  data-level="Средний риск"
+                  data-text="Компания использует типовой регламент бюджетирования, который не учитывает сезонность, проектный характер бизнеса или разные драйверы выручки."
+                  data-conclusion="Единая форма упрощает процесс, но может искажать экономику подразделений."
+                >
+                  <span class="risk-button__level">Средний</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--low"
+                  type="button"
+                  data-trap="Типовая методика"
+                  data-task="Управление ликвидностью"
+                  data-level="Низкий риск"
+                  data-text="Стандартные формы платежного календаря обычно можно адаптировать без существенной перестройки логики. Главный риск связан не с формой, а с качеством прогноза поступлений и платежей."
+                  data-conclusion="Типовая методика здесь редко становится главным ограничением."
+                >
+                  <span class="risk-button__level">Низкий</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--medium"
+                  type="button"
+                  data-trap="Типовая методика"
+                  data-task="Инвестиции"
+                  data-level="Средний риск"
+                  data-text="Финансовая служба оценивает все проекты по одной модели, хотя у них разные сроки, риски и источники эффекта."
+                  data-conclusion="Методика должна учитывать экономику конкретного проекта."
+                >
+                  <span class="risk-button__level">Средний</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--high"
+                  type="button"
+                  data-trap="Типовая методика"
+                  data-task="Управленческая отчетность"
+                  data-level="Высокий риск"
+                  data-text="Форму отчета берут из интернета или копируют из другой компании. Она содержит привычные показатели, но не отвечает на вопросы собственника."
+                  data-conclusion="Отчет формально заполнен, но не поддерживает управленческие решения."
+                >
+                  <span class="risk-button__level">Высокий</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--medium"
+                  type="button"
+                  data-trap="Типовая методика"
+                  data-task="Консолидация"
+                  data-level="Средний риск"
+                  data-text="Единый шаблон консолидации не учитывает особенности бизнес-моделей компаний группы и требует ручных корректировок."
+                  data-conclusion="Стандарт нужен, но его следует адаптировать под структуру группы."
+                >
+                  <span class="risk-button__level">Средний</span>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Осторожность -->
+            <tr>
+              <th scope="row">Осторожность</th>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--medium"
+                  type="button"
+                  data-trap="Осторожность"
+                  data-task="Бюджетирование"
+                  data-level="Средний риск"
+                  data-text="В бюджет закладывают только консервативные показатели. План становится безопасным, но не показывает потенциал роста и потребность в ресурсах."
+                  data-conclusion="Осторожный бюджет может превратиться в ориентир на минимальный результат."
+                >
+                  <span class="risk-button__level">Средний</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--medium"
+                  type="button"
+                  data-trap="Осторожность"
+                  data-task="Управление ликвидностью"
+                  data-level="Средний риск"
+                  data-text="Компания удерживает избыточный денежный резерв и отказывается от выгодных платежных условий, чтобы полностью исключить риск дефицита денег."
+                  data-conclusion="Ликвидность защищена, но свободные деньги работают неэффективно."
+                >
+                  <span class="risk-button__level">Средний</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--high"
+                  type="button"
+                  data-trap="Осторожность"
+                  data-task="Инвестиции"
+                  data-level="Высокий риск"
+                  data-text="Финансовая служба рекомендует отказаться от проекта, потому что не может полностью исключить риски. Потенциальную выгоду и цену бездействия не оценивают."
+                  data-conclusion="Компания избегает не только потерь, но и возможностей роста."
+                >
+                  <span class="risk-button__level">Высокий</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--low"
+                  type="button"
+                  data-trap="Осторожность"
+                  data-task="Управленческая отчетность"
+                  data-level="Низкий риск"
+                  data-text="Осторожность помогает проверять спорные показатели и раскрывать ограничения данных. Обычно она не мешает отчетности, пока не приводит к отказу от оценочных значений."
+                  data-conclusion="Риск невелик, если CFO ясно показывает допущения."
+                >
+                  <span class="risk-button__level">Низкий</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--low"
+                  type="button"
+                  data-trap="Осторожность"
+                  data-task="Консолидация"
+                  data-level="Низкий риск"
+                  data-text="При консолидации осторожность помогает проверять корректировки и исключение внутригрупповых операций."
+                  data-conclusion="Здесь профессиональная осторожность чаще снижает риск ошибки."
+                >
+                  <span class="risk-button__level">Низкий</span>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Общая прибыль -->
+            <tr>
+              <th scope="row">Общая прибыль</th>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--medium"
+                  type="button"
+                  data-trap="Общая прибыль"
+                  data-task="Бюджетирование"
+                  data-level="Средний риск"
+                  data-text="Компания планирует только общую прибыль и не раскладывает ее по продуктам, клиентам или направлениям."
+                  data-conclusion="План не показывает, какие части бизнеса должны обеспечить результат."
+                >
+                  <span class="risk-button__level">Средний</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--low"
+                  type="button"
+                  data-trap="Общая прибыль"
+                  data-task="Управление ликвидностью"
+                  data-level="Низкий риск"
+                  data-text="Ориентация на общую прибыль напрямую не определяет качество платежного календаря. Но она может скрывать разницу между прибылью и денежным потоком."
+                  data-conclusion="Главный риск — принять прибыль за наличие денег."
+                >
+                  <span class="risk-button__level">Низкий</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--medium"
+                  type="button"
+                  data-trap="Общая прибыль"
+                  data-task="Инвестиции"
+                  data-level="Средний риск"
+                  data-text="Инвестпроект оценивают по влиянию на общую прибыль компании, не отделяя эффект проекта от результата действующего бизнеса."
+                  data-conclusion="Собственник не понимает, создает ли инвестиция дополнительную стоимость."
+                >
+                  <span class="risk-button__level">Средний</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--high"
+                  type="button"
+                  data-trap="Общая прибыль"
+                  data-task="Управленческая отчетность"
+                  data-level="Высокий риск"
+                  data-text="Собственник видит положительный итоговый результат, но не знает, какие продукты, клиенты или подразделения создают прибыль, а какие ее уничтожают."
+                  data-conclusion="Общая прибыль скрывает источники результата и не позволяет управлять ими."
+                >
+                  <span class="risk-button__level">Высокий</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--medium"
+                  type="button"
+                  data-trap="Общая прибыль"
+                  data-task="Консолидация"
+                  data-level="Средний риск"
+                  data-text="Группа оценивает только консолидированную прибыль и не анализирует вклад отдельных компаний и бизнес-направлений."
+                  data-conclusion="Хороший результат группы может скрывать хронически убыточные активы."
+                >
+                  <span class="risk-button__level">Средний</span>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Бухгалтерская логика -->
+            <tr>
+              <th scope="row">Бухгалтерская логика</th>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--low"
+                  type="button"
+                  data-trap="Бухгалтерская логика"
+                  data-task="Бюджетирование"
+                  data-level="Низкий риск"
+                  data-text="План счетов может помочь структурировать бюджет, но становится ограничением, если статьи формируют только по бухгалтерской классификации."
+                  data-conclusion="Риск невелик, пока бюджет отражает реальные драйверы бизнеса."
+                >
+                  <span class="risk-button__level">Низкий</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--low"
+                  type="button"
+                  data-trap="Бухгалтерская логика"
+                  data-task="Управление ликвидностью"
+                  data-level="Низкий риск"
+                  data-text="Для платежного календаря важнее даты поступлений и платежей, чем бухгалтерская классификация операций."
+                  data-conclusion="Бухгалтерская логика редко становится здесь основной проблемой."
+                >
+                  <span class="risk-button__level">Низкий</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--medium"
+                  type="button"
+                  data-trap="Бухгалтерская логика"
+                  data-task="Инвестиции"
+                  data-level="Средний риск"
+                  data-text="Затраты оценивают по счету учета, а не по их роли в создании будущего экономического эффекта."
+                  data-conclusion="Операционные и инвестиционные расходы могут быть классифицированы неверно."
+                >
+                  <span class="risk-button__level">Средний</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--high"
+                  type="button"
+                  data-trap="Бухгалтерская логика"
+                  data-task="Управленческая отчетность"
+                  data-level="Высокий риск"
+                  data-text="Управленческая отчетность повторяет бухгалтерскую и показывает счета и статьи, но не объясняет маржинальность, драйверы затрат и качество прибыли."
+                  data-conclusion="Отчетность сходится, но не объясняет бизнес."
+                >
+                  <span class="risk-button__level">Высокий</span>
+                </button>
+              </td>
+
+              <td class="heatmap-cell">
+                <button
+                  class="risk-button risk-button--high"
+                  type="button"
+                  data-trap="Бухгалтерская логика"
+                  data-task="Консолидация"
+                  data-level="Высокий риск"
+                  data-text="Расходы отдельного юрлица механически переносят в отчетность группы, хотя для группы они могут быть инвестициями или внутригрупповым оборотом."
+                  data-conclusion="Бухгалтерская форма подменяет экономический смысл операции."
+                >
+                  <span class="risk-button__level">Высокий</span>
+                </button>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <aside class="explanation" aria-live="polite">
+        <div class="explanation__content">
+          <p class="explanation__label" id="explanationLevel">
+            Высокий риск
+          </p>
+
+          <h2 class="explanation__title" id="explanationTitle">
+            Точность × управление ликвидностью
+          </h2>
+
+          <p class="explanation__text" id="explanationText">
+            Компания не закладывает просрочку дебиторской задолженности,
+            потому что нет подтвержденных данных. Платежный календарь
+            показывает ложный запас денег.
+          </p>
+
+          <div class="explanation__conclusion" id="explanationConclusion">
+            Кассовый разрыв обнаруживают, когда изменить график платежей уже сложно.
+          </div>
+        </div>
+      </aside>
+
+      <p class="heatmap__note">
+        Оценка показывает, где профессиональная привычка чаще всего создает
+        управленческий риск. Уровень риска может отличаться в зависимости
+        от отрасли, структуры группы и зрелости финансовой функции.
+      </p>
+
+    </section>
+  </main>
+
+  <script>
+    const riskButtons = document.querySelectorAll(".risk-button");
+
+    const explanationLevel =
+      document.getElementById("explanationLevel");
+
+    const explanationTitle =
+      document.getElementById("explanationTitle");
+
+    const explanationText =
+      document.getElementById("explanationText");
+
+    const explanationConclusion =
+      document.getElementById("explanationConclusion");
+
+    riskButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        riskButtons.forEach((item) => {
+          item.classList.remove("is-active");
+          item.setAttribute("aria-pressed", "false");
+        });
+
+        button.classList.add("is-active");
+        button.setAttribute("aria-pressed", "true");
+
+        explanationLevel.textContent = button.dataset.level;
+
+        explanationTitle.textContent =
+          `${button.dataset.trap} × ${button.dataset.task.toLowerCase()}`;
+
+        explanationText.textContent = button.dataset.text;
+        explanationConclusion.textContent = button.dataset.conclusion;
+
+        if (window.innerWidth < 760) {
+          document
+            .querySelector(".explanation")
+            .scrollIntoView({
+              behavior: "smooth",
+              block: "start"
+            });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
