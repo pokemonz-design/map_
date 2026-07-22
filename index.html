@@ -163,7 +163,7 @@
       vertical-align: middle;
     }
 
-    .heatmap-table thead th {
+    . {
       height: 92px;
       padding: 12px 10px;
       color: var(--black);
@@ -187,22 +187,31 @@
       оранжевая заливка, белый текст.
     */
 
-    .heatmap-table tbody th {
-      width: 110px;
-      padding: 18px 16px;
-      color: var(--white);
-      background: var(--brand-orange);
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: 18px;
-      line-height: 1.2;
-      text-align: left;
-    }
+    .heatmap-table thead th:first-child,
+.heatmap-table tbody th {
+  width: 110px;
+  min-width: 110px;
+}
 
-    .heatmap-cell {
-      height: 136px;
-      padding: 0;
-      background: transparent;
-    }
+.heatmap-table tbody th {
+  padding: 14px;
+  color: var(--white);
+  background: var(--brand-orange);
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  text-align: left;
+  vertical-align: bottom;
+
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
 
     /* Интерактивная ячейка */
 
