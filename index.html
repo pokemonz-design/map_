@@ -12,16 +12,13 @@
       --black: #080808;
       --white: #ffffff;
       --page-bg: #f6f4f1;
-      --gray-dark: #4f4f4f;
 
-      /* Лицевая сторона карточек */
       --risk-low: #63be7b;
       --risk-medium: #ffdf63;
       --risk-high: #ef5b5d;
 
-      /* Карточки после нажатия */
-      --risk-low-open: #82ce95;
-      --risk-medium-open: #e5b93e;
+      --risk-low-open: #91d5a0;
+      --risk-medium-open: #e7bc4b;
       --risk-high-open: #bd3437;
     }
 
@@ -47,18 +44,17 @@
       font: inherit;
     }
 
-    /* Общий размер виджета */
-
     .heatmap {
+      position: relative;
       width: 757px;
       height: 580px;
       max-width: 100%;
       margin: 0 auto;
-      overflow: hidden;
+      overflow: visible;
       background: var(--white);
     }
 
-    /* Заголовочная часть */
+    /* Заголовок */
 
     .heatmap__header {
       height: 102px;
@@ -75,10 +71,6 @@
       letter-spacing: 0.07em;
       text-transform: uppercase;
     }
-
-    /*
-      Заголовок уменьшен примерно в 1,5 раза.
-    */
 
     .heatmap__title {
       margin: 0;
@@ -102,22 +94,20 @@
       color: var(--orange);
     }
 
-    /* Основной блок */
+    /* Таблица */
 
     .heatmap__body {
       width: 100%;
       height: 478px;
       padding: 0 6px 6px;
-      overflow: hidden;
+      overflow: visible;
     }
 
     .heatmap__table-wrap {
       width: 100%;
       height: 100%;
-      overflow: hidden;
+      overflow: visible;
     }
-
-    /* Таблица */
 
     .heatmap-table {
       width: 100%;
@@ -132,8 +122,6 @@
     .heatmap-table td {
       padding: 0;
     }
-
-    /* Шапка таблицы */
 
     .heatmap-table thead th {
       height: 47px;
@@ -171,7 +159,6 @@
       color: var(--white);
       background: var(--orange);
 
-      font-family: Arial, Helvetica, sans-serif;
       font-size: 9px;
       font-weight: 800;
       line-height: 1.15;
@@ -187,15 +174,19 @@
     }
 
     .heatmap-cell {
+      position: relative;
       height: 79px;
       padding: 0;
+      overflow: visible;
       vertical-align: middle;
     }
 
-    /* Интерактивная карточка */
+    /* Карточка */
 
     .risk-card {
       position: relative;
+      z-index: 1;
+
       display: block;
       width: 100%;
       height: 79px;
@@ -213,6 +204,12 @@
 
       appearance: none;
       -webkit-appearance: none;
+
+      transform-origin: center;
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        filter 0.2s ease;
     }
 
     .risk-card:focus-visible {
@@ -220,8 +217,21 @@
       outline-offset: 1px;
     }
 
-    .risk-card:hover {
-      filter: brightness(1.025);
+    /*
+      При наведении карточка увеличивается поверх соседних ячеек.
+    */
+
+    .risk-card:hover,
+    .risk-card:focus-visible {
+      z-index: 100;
+      transform: scale(1.65);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
+      filter: none;
+    }
+
+    .risk-card.is-open:hover,
+    .risk-card.is-open:focus-visible {
+      z-index: 200;
     }
 
     .risk-card__front,
@@ -242,7 +252,6 @@
     .risk-card__front {
       align-items: flex-end;
       justify-content: flex-start;
-
       opacity: 1;
       visibility: visible;
     }
@@ -250,7 +259,6 @@
     .risk-card__back {
       align-items: flex-start;
       justify-content: flex-start;
-
       opacity: 0;
       visibility: hidden;
     }
@@ -294,18 +302,18 @@
         );
     }
 
-    /* Карточки после нажатия */
+    /* Открытая сторона */
 
     .risk-card--low .risk-card__back {
       color: var(--white);
       background: var(--risk-low-open);
-      text-shadow: 0 1px 1px rgba(0, 70, 20, 0.25);
+      text-shadow: 0 1px 1px rgba(0, 70, 20, 0.28);
     }
 
     .risk-card--medium .risk-card__back {
       color: var(--white);
       background: var(--risk-medium-open);
-      text-shadow: 0 1px 1px rgba(80, 50, 0, 0.35);
+      text-shadow: 0 1px 1px rgba(90, 55, 0, 0.38);
     }
 
     .risk-card--high .risk-card__back {
@@ -325,15 +333,80 @@
     .risk-card__conclusion {
       display: block;
       margin: 0;
-
-      font-size: 8.5px;
+      font-size: 9px;
       font-weight: 700;
-      line-height: 1.14;
+      line-height: 1.18;
       text-align: left;
 
       white-space: normal;
       overflow-wrap: break-word;
       word-break: normal;
+    }
+
+    /*
+      При увеличении карточки текст становится заметно крупнее.
+    */
+
+    .risk-card:hover .risk-card__conclusion,
+    .risk-card:focus-visible .risk-card__conclusion {
+      font-size: 10px;
+      line-height: 1.2;
+    }
+
+    /* Карточки у левого края */
+
+    .heatmap-table td:nth-child(2) .risk-card:hover,
+    .heatmap-table td:nth-child(2) .risk-card:focus-visible {
+      transform-origin: left center;
+    }
+
+    /* Карточки у правого края */
+
+    .heatmap-table td:last-child .risk-card:hover,
+    .heatmap-table td:last-child .risk-card:focus-visible {
+      transform-origin: right center;
+    }
+
+    /* Верхний ряд */
+
+    .heatmap-table tbody tr:first-child .risk-card:hover,
+    .heatmap-table tbody tr:first-child .risk-card:focus-visible {
+      transform-origin: center top;
+    }
+
+    /* Нижний ряд */
+
+    .heatmap-table tbody tr:last-child .risk-card:hover,
+    .heatmap-table tbody tr:last-child .risk-card:focus-visible {
+      transform-origin: center bottom;
+    }
+
+    /* Верхний левый угол */
+
+    .heatmap-table tbody tr:first-child td:nth-child(2) .risk-card:hover,
+    .heatmap-table tbody tr:first-child td:nth-child(2) .risk-card:focus-visible {
+      transform-origin: left top;
+    }
+
+    /* Верхний правый угол */
+
+    .heatmap-table tbody tr:first-child td:last-child .risk-card:hover,
+    .heatmap-table tbody tr:first-child td:last-child .risk-card:focus-visible {
+      transform-origin: right top;
+    }
+
+    /* Нижний левый угол */
+
+    .heatmap-table tbody tr:last-child td:nth-child(2) .risk-card:hover,
+    .heatmap-table tbody tr:last-child td:nth-child(2) .risk-card:focus-visible {
+      transform-origin: left bottom;
+    }
+
+    /* Нижний правый угол */
+
+    .heatmap-table tbody tr:last-child td:last-child .risk-card:hover,
+    .heatmap-table tbody tr:last-child td:last-child .risk-card:focus-visible {
+      transform-origin: right bottom;
     }
 
     @media (max-width: 756px) {
@@ -346,13 +419,66 @@
       }
 
       .heatmap-table tbody th,
-      .risk-card__level,
+      .risk-card__level {
+        font-size: 8px;
+      }
+
       .risk-card__conclusion {
         font-size: 8px;
+      }
+
+      .risk-card:hover,
+      .risk-card:focus-visible {
+        transform: scale(1.45);
+      }
+    }
+
+    @media (hover: none) {
+      /*
+        На телефоне карточка увеличивается после нажатия.
+      */
+
+      .risk-card.is-open {
+        z-index: 100;
+        transform: scale(1.45);
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
+      }
+
+      .heatmap-table td:nth-child(2) .risk-card.is-open {
+        transform-origin: left center;
+      }
+
+      .heatmap-table td:last-child .risk-card.is-open {
+        transform-origin: right center;
+      }
+
+      .heatmap-table tbody tr:first-child .risk-card.is-open {
+        transform-origin: center top;
+      }
+
+      .heatmap-table tbody tr:last-child .risk-card.is-open {
+        transform-origin: center bottom;
+      }
+
+      .heatmap-table tbody tr:first-child td:nth-child(2) .risk-card.is-open {
+        transform-origin: left top;
+      }
+
+      .heatmap-table tbody tr:first-child td:last-child .risk-card.is-open {
+        transform-origin: right top;
+      }
+
+      .heatmap-table tbody tr:last-child td:nth-child(2) .risk-card.is-open {
+        transform-origin: left bottom;
+      }
+
+      .heatmap-table tbody tr:last-child td:last-child .risk-card.is-open {
+        transform-origin: right bottom;
       }
     }
 
     @media (prefers-reduced-motion: reduce) {
+      .risk-card,
       .risk-card__front,
       .risk-card__back {
         transition: none;
@@ -375,14 +501,13 @@
       </h1>
 
       <p class="heatmap__lead">
-        <strong>Нажмите на ячейку</strong>, чтобы увидеть, какой
-        управленческий риск создает привычная логика главного бухгалтера.
+        <strong>Нажмите на ячейку</strong>, чтобы увидеть вывод.
+        Наведите курсор на открытую карточку, чтобы увеличить ее.
         Нажмите еще раз, чтобы вернуть уровень риска.
       </p>
     </header>
 
     <section class="heatmap__body">
-
       <div class="heatmap__table-wrap">
 
         <table class="heatmap-table">
@@ -399,8 +524,6 @@
 
           <tbody>
 
-            <!-- Точность -->
-
             <tr>
               <th scope="row">Точность</th>
 
@@ -408,11 +531,9 @@
                 <button class="risk-card risk-card--high" type="button"
                   aria-label="Точность и бюджетирование. Высокий риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Высокий</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
                       План выглядит точным, но быстро теряет актуальность.
@@ -425,15 +546,12 @@
                 <button class="risk-card risk-card--high" type="button"
                   aria-label="Точность и управление ликвидностью. Высокий риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Высокий</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      Кассовый разрыв обнаруживают, когда изменить график
-                      платежей уже сложно.
+                      Кассовый разрыв обнаруживают, когда изменить график платежей уже сложно.
                     </span>
                   </span>
                 </button>
@@ -443,15 +561,12 @@
                 <button class="risk-card risk-card--medium" type="button"
                   aria-label="Точность и инвестиции. Средний риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Средний</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      CFO нужен не точный прогноз, а диапазон возможных
-                      результатов.
+                      CFO нужен не точный прогноз, а диапазон возможных результатов.
                     </span>
                   </span>
                 </button>
@@ -461,11 +576,9 @@
                 <button class="risk-card risk-card--medium" type="button"
                   aria-label="Точность и управленческая отчетность. Средний риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Средний</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
                       Точность не компенсирует потерю управленческого времени.
@@ -478,11 +591,9 @@
                 <button class="risk-card risk-card--low" type="button"
                   aria-label="Точность и консолидация. Низкий риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Низкий</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
                       Здесь точность чаще помогает, чем ограничивает.
@@ -492,8 +603,6 @@
               </td>
             </tr>
 
-            <!-- Типовая методика -->
-
             <tr>
               <th scope="row">Типовая методика</th>
 
@@ -501,15 +610,12 @@
                 <button class="risk-card risk-card--medium" type="button"
                   aria-label="Типовая методика и бюджетирование. Средний риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Средний</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      Единая форма упрощает процесс, но может искажать
-                      экономику подразделений.
+                      Единая форма упрощает процесс, но может искажать экономику подразделений.
                     </span>
                   </span>
                 </button>
@@ -519,15 +625,12 @@
                 <button class="risk-card risk-card--low" type="button"
                   aria-label="Типовая методика и управление ликвидностью. Низкий риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Низкий</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      Типовая методика здесь редко становится главным
-                      ограничением.
+                      Типовая методика здесь редко становится главным ограничением.
                     </span>
                   </span>
                 </button>
@@ -537,11 +640,9 @@
                 <button class="risk-card risk-card--medium" type="button"
                   aria-label="Типовая методика и инвестиции. Средний риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Средний</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
                       Методика должна учитывать экономику конкретного проекта.
@@ -554,15 +655,12 @@
                 <button class="risk-card risk-card--high" type="button"
                   aria-label="Типовая методика и управленческая отчетность. Высокий риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Высокий</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      Отчет формально заполнен, но не поддерживает
-                      управленческие решения.
+                      Отчет формально заполнен, но не поддерживает управленческие решения.
                     </span>
                   </span>
                 </button>
@@ -572,22 +670,17 @@
                 <button class="risk-card risk-card--medium" type="button"
                   aria-label="Типовая методика и консолидация. Средний риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Средний</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      Стандарт нужен, но его следует адаптировать под
-                      структуру группы.
+                      Стандарт нужен, но его следует адаптировать под структуру группы.
                     </span>
                   </span>
                 </button>
               </td>
             </tr>
-
-            <!-- Осторожность -->
 
             <tr>
               <th scope="row">Осторожность</th>
@@ -596,15 +689,12 @@
                 <button class="risk-card risk-card--medium" type="button"
                   aria-label="Осторожность и бюджетирование. Средний риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Средний</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      Осторожный бюджет может превратиться в ориентир
-                      на минимальный результат.
+                      Осторожный бюджет может превратиться в ориентир на минимальный результат.
                     </span>
                   </span>
                 </button>
@@ -614,15 +704,12 @@
                 <button class="risk-card risk-card--medium" type="button"
                   aria-label="Осторожность и управление ликвидностью. Средний риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Средний</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      Ликвидность защищена, но свободные деньги работают
-                      неэффективно.
+                      Ликвидность защищена, но свободные деньги работают неэффективно.
                     </span>
                   </span>
                 </button>
@@ -632,15 +719,12 @@
                 <button class="risk-card risk-card--high" type="button"
                   aria-label="Осторожность и инвестиции. Высокий риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Высокий</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      Компания избегает не только потерь, но и возможностей
-                      роста.
+                      Компания избегает не только потерь, но и возможностей роста.
                     </span>
                   </span>
                 </button>
@@ -650,11 +734,9 @@
                 <button class="risk-card risk-card--low" type="button"
                   aria-label="Осторожность и управленческая отчетность. Низкий риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Низкий</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
                       Риск невелик, если CFO ясно показывает допущения.
@@ -667,11 +749,9 @@
                 <button class="risk-card risk-card--low" type="button"
                   aria-label="Осторожность и консолидация. Низкий риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Низкий</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
                       Профессиональная осторожность чаще снижает риск ошибки.
@@ -681,8 +761,6 @@
               </td>
             </tr>
 
-            <!-- Общая прибыль -->
-
             <tr>
               <th scope="row">Общая прибыль</th>
 
@@ -690,15 +768,12 @@
                 <button class="risk-card risk-card--medium" type="button"
                   aria-label="Общая прибыль и бюджетирование. Средний риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Средний</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      План не показывает, какие части бизнеса должны
-                      обеспечить результат.
+                      План не показывает, какие части бизнеса должны обеспечить результат.
                     </span>
                   </span>
                 </button>
@@ -708,11 +783,9 @@
                 <button class="risk-card risk-card--low" type="button"
                   aria-label="Общая прибыль и управление ликвидностью. Низкий риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Низкий</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
                       Главный риск — принять прибыль за наличие денег.
@@ -725,15 +798,12 @@
                 <button class="risk-card risk-card--medium" type="button"
                   aria-label="Общая прибыль и инвестиции. Средний риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Средний</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      Собственник не понимает, создает ли инвестиция
-                      дополнительную стоимость.
+                      Собственник не понимает, создает ли инвестиция дополнительную стоимость.
                     </span>
                   </span>
                 </button>
@@ -743,15 +813,12 @@
                 <button class="risk-card risk-card--high" type="button"
                   aria-label="Общая прибыль и управленческая отчетность. Высокий риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Высокий</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      Общая прибыль скрывает источники результата и не
-                      позволяет управлять ими.
+                      Общая прибыль скрывает источники результата и не позволяет управлять ими.
                     </span>
                   </span>
                 </button>
@@ -761,22 +828,17 @@
                 <button class="risk-card risk-card--medium" type="button"
                   aria-label="Общая прибыль и консолидация. Средний риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Средний</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      Хороший результат группы может скрывать хронически
-                      убыточные активы.
+                      Хороший результат группы может скрывать хронически убыточные активы.
                     </span>
                   </span>
                 </button>
               </td>
             </tr>
-
-            <!-- Бухгалтерская логика -->
 
             <tr>
               <th scope="row">Бухгалтерская логика</th>
@@ -785,15 +847,12 @@
                 <button class="risk-card risk-card--low" type="button"
                   aria-label="Бухгалтерская логика и бюджетирование. Низкий риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Низкий</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      Риск невелик, пока бюджет отражает реальные драйверы
-                      бизнеса.
+                      Риск невелик, пока бюджет отражает реальные драйверы бизнеса.
                     </span>
                   </span>
                 </button>
@@ -803,15 +862,12 @@
                 <button class="risk-card risk-card--low" type="button"
                   aria-label="Бухгалтерская логика и управление ликвидностью. Низкий риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Низкий</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      Бухгалтерская логика редко становится здесь основной
-                      проблемой.
+                      Бухгалтерская логика редко становится здесь основной проблемой.
                     </span>
                   </span>
                 </button>
@@ -821,15 +877,12 @@
                 <button class="risk-card risk-card--medium" type="button"
                   aria-label="Бухгалтерская логика и инвестиции. Средний риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Средний</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      Операционные и инвестиционные расходы могут быть
-                      классифицированы неверно.
+                      Операционные и инвестиционные расходы могут быть классифицированы неверно.
                     </span>
                   </span>
                 </button>
@@ -839,11 +892,9 @@
                 <button class="risk-card risk-card--high" type="button"
                   aria-label="Бухгалтерская логика и управленческая отчетность. Высокий риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Высокий</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
                       Отчетность сходится, но не объясняет бизнес.
@@ -856,15 +907,12 @@
                 <button class="risk-card risk-card--high" type="button"
                   aria-label="Бухгалтерская логика и консолидация. Высокий риск"
                   aria-pressed="false">
-
                   <span class="risk-card__front">
                     <span class="risk-card__level">Высокий</span>
                   </span>
-
                   <span class="risk-card__back">
                     <span class="risk-card__conclusion">
-                      Бухгалтерская форма подменяет экономический смысл
-                      операции.
+                      Бухгалтерская форма подменяет экономический смысл операции.
                     </span>
                   </span>
                 </button>
